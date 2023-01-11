@@ -1,0 +1,1 @@
+add the configuration path of storing the images in docker

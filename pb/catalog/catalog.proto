@@ -1,0 +1,54 @@
+// protoc --go_out=.. --go-grpc_out=.. *.proto
+// protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative catalog.proto
+syntax = "proto3";
+
+package tagesTestTask;
+option go_package = "pb/catalog/pb";
+
+message File {
+  string name = 1;
+  bytes chunk = 2;
+}
+
+message Res {
+  string info = 1;
+}
+
+message UploadFileReq {
+  File file = 1;
+}
+
+message UploadFileRes {
+  Res response = 1;
+}
+
+message GetFileListReq {
+
+}
+
+message GetFileListRes {
+  repeated File files = 1;
+}
+
+message GetFileByNameReq {
+  string name = 1;
+}
+
+message GetFileByNameRes {
+  File file = 1;
+}
+
+message GetFilesByCategoryReq {
+  string name = 1;
+}
+
+message GetFileByCategoryRes {
+  repeated File file = 1;
+}
+
+service catalogService {
+  rpc UploadFile (UploadFileReq) returns (UploadFileRes) {}
+  rpc GetFilesList (GetFileListReq) returns (GetFileListRes) {}
+  rpc GetFileByName (GetFileByNameReq) returns (GetFileByNameRes) {}
+  rpc GetFilesByCategory(GetFilesByCategoryReq) returns (GetFileByCategoryRes) {}
+}
