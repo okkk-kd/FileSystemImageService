@@ -3,6 +3,7 @@ package controller
 import (
 	"context"
 	"tagesTestTask/internal/catalog/usecase"
+	"tagesTestTask/internal/models"
 	pbCatalog "tagesTestTask/pb/catalog"
 )
 
@@ -15,29 +16,50 @@ type Catalog interface {
 	UploadFile(ctx context.Context, req *pbCatalog.UploadFileReq) (*pbCatalog.UploadFileRes, error)
 	GetFilesList(ctx context.Context, req *pbCatalog.GetFileListReq) (*pbCatalog.GetFileListRes, error)
 	GetFileByName(ctx context.Context, req *pbCatalog.GetFileByNameReq) (*pbCatalog.GetFileByNameRes, error)
-	GetFilesByCategory(ctx context.Context, req *pbCatalog.GetFilesByCategoryReq) (*pbCatalog.GetFileByCategoryRes, error)
 }
 
-func NewCatalogCtrl() (obj *catalog, err error) {
-	return &catalog{}, err
+func NewCatalogCtrl(uc usecase.Catalog) (obj *catalog, err error) {
+	return &catalog{
+		uc: uc,
+	}, err
 }
 
-func (c *catalog) UploadFile(ctx context.Context, req *pbCatalog.UploadFileReq) (*pbCatalog.UploadFileRes, error) {
-	//TODO implement me
-	panic("implement me")
+func (c *catalog) UploadFile(ctx context.Context, req *pbCatalog.UploadFileReq) (resp *pbCatalog.UploadFileRes, err error) {
+	if err := c.uc.UploadFile(
+		models.UploadFileRequest{
+			ClientID: int(req.GetClientID()),
+			FileName: req.GetFile().GetName(),
+			File:     req.GetFile().GetChunk(),
+		},
+	); err != nil {
+		return nil, err
+	}
+	return &pbCatalog.UploadFileRes{Response: &pbCatalog.Res{
+		Info: "All good!)",
+	}}, nil
 }
 
 func (c *catalog) GetFilesList(ctx context.Context, req *pbCatalog.GetFileListReq) (*pbCatalog.GetFileListRes, error) {
-	//TODO implement me
-	panic("implement me")
+	list, err := c.uc.GetFileList(models.GetFileList{
+		int(34568),
+	})
+	if err != nil {
+		return nil, err
+	}
+	var resList pbCatalog.GetFileListRes
+	for _, el := range list.List {
+		resList.Files = append(resList.Files, &pbCatalog.GetFileListRes_File{Id: int64(el.ImgID), Name: el.Name})
+	}
+	return &resList, nil
 }
 
 func (c *catalog) GetFileByName(ctx context.Context, req *pbCatalog.GetFileByNameReq) (*pbCatalog.GetFileByNameRes, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (c *catalog) GetFilesByCategory(ctx context.Context, req *pbCatalog.GetFilesByCategoryReq) (*pbCatalog.GetFileByCategoryRes, error) {
-	//TODO implement me
-	panic("implement me")
+	img, err := c.uc.GetFileByName(models.GetFileByName{
+		int(34568),
+		req.GetName(),
+	})
+	if err != nil {
+		return nil, err
+	}
+	return &pbCatalog.GetFileByNameRes{Chunk: img}, nil
 }

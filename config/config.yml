@@ -1,0 +1,22 @@
+Server:
+  Host: 0.0.0.0
+  Port: 7002
+  ShowUnknownErrorsInResponse: true
+  APIRateLimiter:
+    Max: 9999
+    Expiration: 1
+Postgres:
+  Host: localhost
+  Port: 5432
+  User: postgres
+  Password: postgres
+  DBName: postgres
+  SSLMode: disable
+  PGDriver: pgx
+  settings:
+    MaxOpenConns: 60
+    ConnMaxLifetime: 120
+    MaxIdleConns: 30
+    ConnMaxIdleTime: 20
+Logger:
+  Level: 1

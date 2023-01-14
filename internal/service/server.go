@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 	"tagesTestTask/config"
+	"tagesTestTask/pkg/diskStorage"
 	"tagesTestTask/pkg/logger"
 )
 
@@ -42,12 +43,6 @@ func NewServer(
 }
 
 func (s *server) RunServer() (err error) {
-	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%s", s.cfg.Host, s.cfg.Port))
-	if err := s.gSrv.Serve(lis); err != nil {
-		fmt.Println("Error starting Server: ", err.Error())
-		return
-	}
-
 	newService, err := NewService()
 	if err != nil {
 		log.Fatalln(err.Error())
@@ -61,10 +56,28 @@ func (s *server) RunServer() (err error) {
 		return
 	}
 
-	err = controllers.Catalog.InitCatalog(s.gSrv)
+	//utils
+	storage, err := diskStorage.NewDiskStorage(s.pgDB, 2)
+	if err != nil {
+		return err
+	}
+
+	err = controllers.Catalog.InitCatalog(s.pgDB, storage, s.gSrv)
 	if err != nil {
 		return
 	}
+
+	lis, err := net.Listen("tcp", fmt.Sprintf("%s:%s", s.cfg.Server.Host, s.cfg.Server.Port))
+	if err != nil {
+		fmt.Println("Error listening: ", err.Error())
+		return err
+	}
+	go func() {
+		if err := s.gSrv.Serve(lis); err != nil {
+			fmt.Println("Error starting Server: ", err.Error())
+			return
+		}
+	}()
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)

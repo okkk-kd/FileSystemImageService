@@ -55,6 +55,7 @@ func main() {
 	if err != nil {
 		return
 	}
+	log.Default().Println("Service has been started")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)

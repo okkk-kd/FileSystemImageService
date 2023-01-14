@@ -5,17 +5,18 @@ syntax = "proto3";
 package tagesTestTask;
 option go_package = "pb/catalog/pb";
 
-message File {
-  string name = 1;
-  bytes chunk = 2;
-}
-
 message Res {
   string info = 1;
 }
 
 message UploadFileReq {
+  message File {
+    string name = 1;
+    bytes chunk = 2;
+  }
+
   File file = 1;
+  int64 clientID = 2;
 }
 
 message UploadFileRes {
@@ -23,32 +24,29 @@ message UploadFileRes {
 }
 
 message GetFileListReq {
-
+  int64 clientID = 1;
 }
 
 message GetFileListRes {
+  message File {
+    string name = 1;
+    int64 id = 2;
+  }
   repeated File files = 1;
 }
 
 message GetFileByNameReq {
   string name = 1;
+  int64 clientID = 2;
 }
 
 message GetFileByNameRes {
-  File file = 1;
+  bytes chunk = 1;
 }
 
-message GetFilesByCategoryReq {
-  string name = 1;
-}
-
-message GetFileByCategoryRes {
-  repeated File file = 1;
-}
 
 service catalogService {
   rpc UploadFile (UploadFileReq) returns (UploadFileRes) {}
   rpc GetFilesList (GetFileListReq) returns (GetFileListRes) {}
   rpc GetFileByName (GetFileByNameReq) returns (GetFileByNameRes) {}
-  rpc GetFilesByCategory(GetFilesByCategoryReq) returns (GetFileByCategoryRes) {}
 }
