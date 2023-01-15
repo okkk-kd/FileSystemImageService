@@ -41,7 +41,7 @@ message GetFileByNameReq {
 }
 
 message GetFileByNameRes {
-  bytes chunk = 1;
+  string chunk = 1;
 }
 
 

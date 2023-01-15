@@ -13,7 +13,7 @@ type catalog struct {
 type Catalog interface {
 	UploadFile(params models.UploadFileRequest) error
 	GetFileList(params models.GetFileList) (diskStorage.ImageList, error)
-	GetFileByName(params models.GetFileByName) ([]byte, error)
+	GetFileByName(params models.GetFileByName) (string, error)
 }
 
 func NewCatalogUC(repo repository.Catalog) (obj Catalog, err error) {
@@ -37,10 +37,10 @@ func (c *catalog) GetFileList(params models.GetFileList) (diskStorage.ImageList,
 	return list, nil
 }
 
-func (c *catalog) GetFileByName(params models.GetFileByName) ([]byte, error) {
+func (c *catalog) GetFileByName(params models.GetFileByName) (string, error) {
 	img, err := c.repo.GetFileByName(params)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	return img, nil
 }

@@ -39,18 +39,21 @@ func (c *catalog) UploadFile(ctx context.Context, req *pbCatalog.UploadFileReq) 
 	}}, nil
 }
 
-func (c *catalog) GetFilesList(ctx context.Context, req *pbCatalog.GetFileListReq) (*pbCatalog.GetFileListRes, error) {
+func (c *catalog) GetFilesList(ctx context.Context, req *pbCatalog.GetFileListReq) (res *pbCatalog.GetFileListRes, err error) {
 	list, err := c.uc.GetFileList(models.GetFileList{
 		int(34568),
 	})
 	if err != nil {
 		return nil, err
 	}
-	var resList pbCatalog.GetFileListRes
+	var resList []*pbCatalog.GetFileListRes_File
 	for _, el := range list.List {
-		resList.Files = append(resList.Files, &pbCatalog.GetFileListRes_File{Id: int64(el.ImgID), Name: el.Name})
+		resList = append(resList, &pbCatalog.GetFileListRes_File{Id: int64(el.ImgID), Name: el.Name})
 	}
-	return &resList, nil
+	res = &pbCatalog.GetFileListRes{
+		Files: resList,
+	}
+	return res, nil
 }
 
 func (c *catalog) GetFileByName(ctx context.Context, req *pbCatalog.GetFileByNameReq) (*pbCatalog.GetFileByNameRes, error) {

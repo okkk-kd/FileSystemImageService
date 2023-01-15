@@ -21,7 +21,7 @@ type diskStorage struct {
 
 type DiskStorage interface {
 	Upload(clientID int, fileName string, file []byte) error
-	Download(clientID int, fileName string) ([]byte, error)
+	Download(clientID int, fileName string) (string, error)
 	GetList(clientID int) (ImageList, error)
 
 	write(data Image, clientID int, name string) error
@@ -77,28 +77,28 @@ func (d *diskStorage) Upload(clientID int, fileName string, file []byte) error {
 	return nil
 }
 
-func (d *diskStorage) Download(clientID int, fileName string) ([]byte, error) {
+func (d *diskStorage) Download(clientID int, fileName string) (string, error) {
 	var img Image
 	el, ok := d.data[clientID]
 	if ok {
 		img, ok = el[fileName]
 		if ok {
-			return img.BinaryData, nil
+			return string(img.BinaryData), nil
 		}
 	}
 	if err := d.db.Get(&img, queryDownloadFile, clientID, fileName); err != nil {
-		return nil, err
+		return "", err
 	}
 	file, err := os.Open(d.file(clientID, img.ImgID))
 
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer file.Close()
 
 	stats, statsErr := file.Stat()
 	if statsErr != nil {
-		return nil, statsErr
+		return "", statsErr
 	}
 
 	var size int64 = stats.Size()
@@ -106,10 +106,11 @@ func (d *diskStorage) Download(clientID int, fileName string) ([]byte, error) {
 
 	bufr := bufio.NewReader(file)
 	_, err = bufr.Read(bytes)
+	img.BinaryData = bytes
 	if err := d.write(img, clientID, fileName); err != nil {
-		return nil, err
+		return "", err
 	}
-	return bytes, nil
+	return string(bytes), nil
 }
 
 func (d *diskStorage) GetList(clientID int) (ImageList, error) {
